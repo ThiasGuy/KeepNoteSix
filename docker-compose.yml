@@ -1,0 +1,33 @@
+version: '3.4'
+
+networks:
+  backend: 
+  
+services:
+  employeedb:
+    container_name: employee-db
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=S3cur3P@ssW0rd! 
+    networks:
+      - backend
+    ports:
+      - 8001:1433
+
+  authenticationservice:
+    image: ${DOCKER_REGISTRY-}authenticationservice
+    build:
+      context: .
+      dockerfile: AuthenticationService/Dockerfile
+
+    networks:
+      - backend
+    ports:
+      - 8002:80
+    volumes:
+      - "./data:/var/opt/mssql"
+    environment:
+      - DB_HOST=employeedb
+      - DB_NAME=employee_db
+      - DB_MSSQL_SA_PASSWORD=S3cur3P@ssW0rd!
